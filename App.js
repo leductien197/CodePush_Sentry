@@ -30,7 +30,7 @@ const App = () => {
       <TouchableOpacity
         style={styles.btnErr}
         onPress={() => {
-          CodePush.checkForUpdate('M1xuoJlOYitbyYa6yjSHH5dG72i2vuX-YfR0-')
+          CodePush.checkForUpdate('M1xuoJlOYitbyYa6yjSHH5dG72i2vuX-YfR0-') // ios product key
             .then(v => {
               alert('checkupdate', v);
             })
