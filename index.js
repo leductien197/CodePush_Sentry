@@ -10,10 +10,10 @@ import CodePush from 'react-native-code-push';
 AppRegistry.registerComponent(appName, () =>
   CodePush({
     updateDialog: {
-      optionalInstallButtonLabel: 'Cài đặt',
-      optionalIgnoreButtonLabel: 'Bỏ qua',
-      title: 'Cập nhật có sẵn',
-      optionalUpdateMessage: 'Đã có bản cập nhật, bạn có muốn cài đặt nó?',
+      optionalInstallButtonLabel: 'Install',
+      optionalIgnoreButtonLabel: 'Forgot',
+      title: 'You have new update!',
+      optionalUpdateMessage: 'New Update now, please click the button Install',
     },
     installMode: CodePush.InstallMode.IMMEDIATE,
     checkFrequency: CodePush.CheckFrequency.ON_APP_START,
