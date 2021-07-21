@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">CodePush01</string>
-    <string moduleConfig="true" name="CodePushDeploymentKey">FnxzbSc3YNNgcikJXHoTcSZSjp6Q_gbk8LV97</string>
+    <!-- production -->
+    <!-- <string moduleConfig="true" name="CodePushDeploymentKey">FnxzbSc3YNNgcikJXHoTcSZSjp6Q_gbk8LV97</string> -->
+    <!-- staging -->
+    <string moduleConfig="true" name="CodePushDeploymentKey">N1CwoGuRBW_AGF_CDaCCqyVX-7qEK5sppYy4w</string>
 <string name="appCenterCrashes_whenToSendCrashes" moduleConfig="true" translatable="false">DO_NOT_ASK_JAVASCRIPT</string>
 <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true" translatable="false">ALWAYS_SEND</string>
 </resources>

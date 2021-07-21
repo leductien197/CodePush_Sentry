@@ -135,6 +135,7 @@ android {
         applicationId "com.codepush01"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
         versionCode 1
         versionName "1.0"
     }
