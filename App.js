@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   Modal,
   TouchableNativeFeedback,
+  AsyncStorage,
 } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import CodePush from 'react-native-code-push';
@@ -25,7 +26,8 @@ const codePushOptions = {
 };
 
 const App = () => {
-  // ________down_to_china_push___________
+  const toastRef = useRef();
+  // ________down_to_code_push___________
   const [isUpdate, setIsUpdate] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,33 +40,16 @@ const App = () => {
     check();
   });
   const check = () => {
-    CodePush.checkForUpdate().then(update => {
-      console.log('update check', update);
+    CodePush.checkForUpdate().then(async update => {
       if (!update || update.failedInstall) {
-        // is the latest version
+        // __
       } else {
         setModalVisible(true);
-        setUpdateInfo({...updateInfo, update});
+        setUpdateInfo(update);
         setIsMandatory(update.isMandatory);
-        console.log('updateInfo', updateInfo);
       }
     });
   };
-  // useEffect(() => {
-  //   const check = () => {
-  //     CodePush.checkForUpdate().then(update => {
-  //       console.log('update check', update);
-  //       if (!update || update.failedInstall) {
-  //         // is the latest version
-  //       } else {
-  //         setModalVisible(true);
-  //         setUpdateInfo({...updateInfo, update});
-  //         setIsMandatory(update.isMandatory);
-  //       }
-  //     });
-  //   };
-  //   check();
-  // });
 
   // ham update version
   const update = () => {
@@ -82,6 +67,7 @@ const App = () => {
   // ham cancle modal
   const onCancel = () => {
     setModalVisible(false);
+    // setIsUpdate(false);
     // isUpdate(false);
   };
 
@@ -113,6 +99,9 @@ const App = () => {
         case CodePush.SyncStatus.UNKNOWN_ERROR:
           setSyncMessage('An unknown error occurred');
           Toast.show('Update error, please restart the application! ');
+          // toastRef.current.show(
+          //   'Update error, please restart the application! ',
+          // );
           setModalVisible(false);
           break;
       }
@@ -120,19 +109,31 @@ const App = () => {
   };
 
   // ham tinh toan progress
-  const codePushDownloadDidProgress = Progress => {
+  const codePushDownloadDidProgress = async Progress => {
+    console.log('Progress', Progress);
     if (isUpdate) {
       let currProgress =
-        Math.round((Progress.receivedBytes / Progress.totalBytes) * 100) / 100;
+        (await Math.round(
+          (Progress.receivedBytes / Progress.totalBytes) * 100,
+        )) / 100;
+      await console.log('currProgress', currProgress);
       if (currProgress >= 1) {
         setModalVisible(false);
       } else {
-        setProgress(currProgress);
+        await setProgress(currProgress);
       }
+      await console.log('progesss01', progress);
     }
   };
   // __________up_to_look_code_push
 
+  // const [testProgress, setTestProgress] = useState(0);
+  // setTimeout(() => {
+  //   setTestProgress(testProgress + 0.1);
+  // }, 1000);
+  // const formatText = testProgress => {
+  //   return `${Math.round(testProgress * 100)}%`;
+  // };
   return (
     <>
       <View style={styles.viewTest}>
@@ -142,23 +143,22 @@ const App = () => {
         <Text style={[styles.title, {color: 'red'}]}>
           Parents: What did you say ?
         </Text>
-        <Text style={[styles.title, {color: 'red'}]}>Girl: I, say .... ?</Text>
-        <Text style={[styles.title, {color: 'red'}]}>Girl: I, say .... ?</Text>
         <Text style={[styles.title, {color: 'red'}]}>
-          updateInfo: {updateInfo}
+          Parents: What did you say ?
         </Text>
       </View>
       <Modal animationType={'none'} transparent={true} visible={modalVisible}>
         <View style={styles.content}>
+          {/* {isUpdate == true ? ( */}
           {!isUpdate ? (
             <View style={styles.contentArea}>
               <Text style={[styles.header, {color: 'red'}]}>
                 New version found
               </Text>
               <View style={styles.updateDes}>
-                <Text style={styles.title}>Version: {updateInfo.label}</Text>
+                <Text style={styles.title}>Version: {updateInfo?.label}</Text>
                 <Text style={[styles.description, {color: 'blue'}]}>
-                  Package Size: {updateInfo.packageSize}kb
+                  Package Size: {updateInfo?.packageSize}kb
                 </Text>
               </View>
               {/* button to determine whether to force an update */}
@@ -166,14 +166,14 @@ const App = () => {
                 <View style={styles.buttonArea}>
                   <TouchableOpacity onPress={() => update()}>
                     <View style={[styles.button, {backgroundColor: 'red'}]}>
-                      <Text style={styles.buttonText}>update immediately</Text>
+                      <Text style={styles.buttonText}>Update</Text>
                     </View>
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles.buttonsArea}>
                   <TouchableOpacity onPress={() => onCancel()}>
-                    <View style={[styles.buttons, {backgroundColor: 'red'}]}>
+                    <View style={[styles.buttons, {backgroundColor: 'gray'}]}>
                       <Text style={[styles.buttonText]}>Cancel</Text>
                     </View>
                   </TouchableOpacity>
@@ -190,24 +190,19 @@ const App = () => {
               <Text style={[styles.header, {color: 'red'}]}>
                 Updating download,Please wait
               </Text>
-              <Progress.Bar
+              <Progress.Circle
+                animated={true}
                 progress={progress}
-                height={screenHeight * 0.018}
-                width={300}
-                color="orange"
-                style={{
-                  borderWidth: 1.5,
-                  borderColor: 'white',
-                  backgroundColor: 'blue',
-                  borderRadius: 10,
-                }}
+                indeterminate={false}
+                style={{alignSelf: 'center', paddingBottom: 10}}
+                size={70}
+                showsText={true}
+                // endAngle={0.9}
+                // borderWidth={4}
               />
-              <Text style={[styles.header, {color: 'red', fontSize: 18}]}>
-                {progress * 100 + '%'}
-              </Text>
             </View>
           )}
-          {/* <Toast ref={toast => (toast = toast)}></Toast> */}
+          {/* <Toast ref={toastRef} /> */}
         </View>
       </Modal>
     </>
@@ -231,7 +226,7 @@ const styles = StyleSheet.create({
   contentArea: {
     // height:400,
     width: 300,
-    backgroundColor: '#fff',
+    backgroundColor: 'yellow',
     borderRadius: 20,
     display: 'flex',
     justifyContent: 'flex-start',
