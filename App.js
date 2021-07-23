@@ -7,12 +7,12 @@ import {
   Dimensions,
   Modal,
   TouchableNativeFeedback,
-  AsyncStorage,
 } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import CodePush from 'react-native-code-push';
 import * as Progress from 'react-native-progress';
 import Toast from 'react-native-simple-toast';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -38,7 +38,7 @@ const App = () => {
   useEffect(() => {
     CodePush.notifyAppReady();
     check();
-  });
+  }, []);
   const check = () => {
     CodePush.checkForUpdate().then(async update => {
       if (!update || update.failedInstall) {
@@ -52,48 +52,54 @@ const App = () => {
   };
 
   // ham update version
-  const update = () => {
+  const update = async () => {
     setIsUpdate(true);
     CodePush.sync(
       {
         updateDialog: false,
         installMode: CodePush.InstallMode.IMMEDIATE,
       },
-      codePushStatusDidChange(),
-      codePushDownloadDidProgress(),
+      codePushStatusDidChange,
+      codePushDownloadDidProgress,
     );
   };
 
   // ham cancle modal
   const onCancel = () => {
     setModalVisible(false);
-    // setIsUpdate(false);
-    // isUpdate(false);
   };
 
   // ham trang thai download
   const codePushStatusDidChange = syncStatus => {
+    console.log('syncStatus', syncStatus);
     if (isUpdate) {
       switch (syncStatus) {
         case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+          console.log('Checking for update');
           setSyncMessage('Checking for update');
           break;
         case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+          console.log('DOWNLOADING_PACKAGE');
           setSyncMessage('Downloading package');
           break;
         case CodePush.SyncStatus.AWAITING_USER_ACTION:
+          console.log('AWAITING_USER_ACTION');
           setSyncMessage('Awaiting user action');
           break;
         case CodePush.SyncStatus.INSTALLING_UPDATE:
+          console.log('INSTALLING_UPDATE');
           setSyncMessage('Installing update');
           break;
         case CodePush.SyncStatus.UP_TO_DATE:
+          console.log('UP_TO_DATE');
           setSyncMessage('App up to date.');
           break;
         case CodePush.SyncStatus.UPDATE_IGNORED:
+          console.log('UPDATE_IGNORED');
           setSyncMessage('Update cancelled by user');
           break;
         case CodePush.SyncStatus.UPDATE_INSTALLED:
+          console.log('UPDATE_INSTALLED');
           setSyncMessage('Update installed and will be applied on restart.');
           break;
         case CodePush.SyncStatus.UNKNOWN_ERROR:
@@ -109,47 +115,27 @@ const App = () => {
   };
 
   // ham tinh toan progress
-  const codePushDownloadDidProgress = async Progress => {
-    console.log('Progress', Progress);
-    if (isUpdate) {
-      let currProgress =
-        (await Math.round(
-          (Progress.receivedBytes / Progress.totalBytes) * 100,
-        )) / 100;
-      await console.log('currProgress', currProgress);
-      if (currProgress >= 1) {
-        setModalVisible(false);
-      } else {
-        await setProgress(currProgress);
-      }
-      await console.log('progesss01', progress);
+  const codePushDownloadDidProgress = progress => {
+    console.log('progress----1', progress);
+    let currProgress =
+      Math.round((progress.receivedBytes / progress.totalBytes) * 100) / 100;
+    console.log('currProgress,', currProgress);
+    setProgress(currProgress);
+    if (currProgress == 100) {
+      setModalVisible(false);
     }
   };
-  // __________up_to_look_code_push
 
-  // const [testProgress, setTestProgress] = useState(0);
-  // setTimeout(() => {
-  //   setTestProgress(testProgress + 0.1);
-  // }, 1000);
-  // const formatText = testProgress => {
-  //   return `${Math.round(testProgress * 100)}%`;
-  // };
+  console.log('modalVisible', modalVisible);
   return (
-    <>
+    <SafeAreaView>
       <View style={styles.viewTest}>
         <Text style={[styles.title, {color: 'blue'}]}>
-          Girl: Surprise mother father
-        </Text>
-        <Text style={[styles.title, {color: 'red'}]}>
-          Parents: What did you say ?
-        </Text>
-        <Text style={[styles.title, {color: 'red'}]}>
-          Parents: What did you say ?
+          Girl: Surprise mother father !!!
         </Text>
       </View>
       <Modal animationType={'none'} transparent={true} visible={modalVisible}>
         <View style={styles.content}>
-          {/* {isUpdate == true ? ( */}
           {!isUpdate ? (
             <View style={styles.contentArea}>
               <Text style={[styles.header, {color: 'red'}]}>
@@ -205,7 +191,7 @@ const App = () => {
           {/* <Toast ref={toastRef} /> */}
         </View>
       </Modal>
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -294,30 +280,3 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
-
-// const styles = StyleSheet.create({
-//   main: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   txtHello: {
-//     fontSize: 15,
-//     color: 'red',
-//     marginTop: 20,
-//   },
-//   btnErr: {
-//     width: 200,
-//     height: 50,
-//     borderRadius: 30,
-//     backgroundColor: 'blue',
-//     marginTop: 30,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     opacity: 0.5,
-//   },
-//   txtBtnErr: {
-//     color: 'white',
-//     fontSize: 20,
-//   },
-// });
